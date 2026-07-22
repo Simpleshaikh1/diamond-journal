@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Simpleshaikh1/diamond-journal/handler/cli"
+	"github.com/Simpleshaikh1/diamond-journal/internal/config"
+
 	"github.com/spf13/cobra"
 )
 

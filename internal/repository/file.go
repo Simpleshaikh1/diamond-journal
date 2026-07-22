@@ -2,9 +2,11 @@ package repository
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
 )
@@ -39,4 +41,49 @@ func NewFileRepositoy(storageDir string) (*FileRepository, error) {
 	}
 
 	return repo, nil
+}
+
+func (r *FileRepository) Create(entry *domain.Entry) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	entry.ID = r.nextID
+	now := time.Now()
+	entry.CreatedAt = now
+	entry.UpdatedAt = now
+
+	r.entries[entry.ID] = entry
+	r.nextID++
+
+	return r.save()
+}
+
+func (r *FileRepository) Update(entry *domain.Entry) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	//check if entry exist
+	existing, ok := r.entries[entry.ID]
+	if !ok {
+		return fmt.Errorf("entry with ID %d not found", entry.ID)
+	}
+
+	// Update fields
+	existing.Title = entry.Title
+	existing.Content = entry.Content
+	existing.Mood = entry.Mood
+	existing.Tags = entry.Tags
+	existing.Location = entry.Location
+	existing.UpdatedAt = time.Now()
+
+	return r.save()
+}
+
+func (r *FileRepository) save() error {
+	list := make([]*domain.Entry, 0, len(r.entries))
+	for _, e := range r.entries {
+		list = append(list, e)
+	}
+	data, _ := json.MarshalIndent(list, "", " ")
+	return os.WriteFile(r.filepath, data, 0644)
 }
