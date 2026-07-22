@@ -1,0 +1,13 @@
+[
+ {
+  "id": 1,
+  "created_at": "2026-07-22T13:47:47.0465551+01:00",
+  "updated_at": "2026-07-22T13:47:47.0465551+01:00",
+  "title": "My First Journal Entry learning",
+  "content": "This is the first journal entry for the girl that steals my heart.",
+  "mood": "great",
+  "tags": [
+   "work"
+  ]
+ }
+]
