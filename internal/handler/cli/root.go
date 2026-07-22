@@ -11,5 +11,5 @@ func Setup(root *cobra.Command, cfg *config.Config) {
 
 	//Add commands
 	root.AddCommand(newCreateCmd(fileRepo))
-	root.AddCommand(newListCmd(fileRepo))
+	//root.AddCommand(newListCmd(fileRepo))
 }
