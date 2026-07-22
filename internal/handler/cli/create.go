@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
 	"github.com/Simpleshaikh1/diamond-journal/internal/repository"
@@ -29,14 +30,15 @@ func newCreateCmd(repo *repository.FileRepository) *cobra.Command {
 			}
 
 			fmt.Println("Write your entry (press Ctrl+D when done):")
-			contentBytes, _ := os.ReadAll(os.Stdin)
-			content := string(contentBytes)
+			content := readMultiLine()
 
 			entry := &domain.Entry{
-				Title:   title,
-				Content: content,
-				Mood:    domain.Mood(moodStr),
-				Tags:    strings.Split(tagsStr, ","),
+				Title:     title,
+				Content:   content,
+				Mood:      domain.Mood(moodStr),
+				Tags:      parseTags(tagsStr),
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
 			}
 
 			if err := repo.Create(entry); err != nil {
@@ -52,4 +54,34 @@ func newCreateCmd(repo *repository.FileRepository) *cobra.Command {
 	cmd.Flags().StringVar(&moodStr, "mood", string(domain.MoodOkay), "mood")
 	cmd.Flags().StringVar(&tagsStr, "tags", "", "comma-separated tags")
 	return cmd
+}
+
+func readMultiLine() string {
+	var lines []string
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			// Check if next line is also empty
+			if scanner.Scan() && scanner.Text() == "" {
+				break
+			}
+		}
+		lines = append(lines, line)
+	}
+	return strings.Join(lines, "\n")
+}
+
+func parseTags(tagsStr string) []string {
+	if tagsStr == "" {
+		return nil
+	}
+	var tags []string
+	for _, t := range strings.Split(tagsStr, ",") {
+		trimmed := strings.TrimSpace(t)
+		if trimmed != "" {
+			tags = append(tags, trimmed)
+		}
+	}
+	return tags
 }
