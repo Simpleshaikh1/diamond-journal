@@ -18,7 +18,7 @@ type FileRepository struct {
 	nextID   uint
 }
 
-func NewFileRepositoy(storageDir string) (*FileRepository, error) {
+func NewFileRepository(storageDir string) (*FileRepository, error) {
 	filePath := filepath.Join(storageDir, "entries.json")
 	repo := &FileRepository{
 		filepath: filePath,
