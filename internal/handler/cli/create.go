@@ -18,7 +18,7 @@ func newCreateCmd(repo *repository.FileRepository) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "new [title]",
 		Short: "Create a new journal entry",
-		Args:  cobra.MinimumNArgs(0),
+		//Args:  cobra.MinimumNArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
 			title := ""
 			if len(args) > 0 {
@@ -31,6 +31,11 @@ func newCreateCmd(repo *repository.FileRepository) *cobra.Command {
 
 			fmt.Println("Write your entry (press Ctrl+D when done):")
 			content := readMultiLine()
+
+			if content == "" {
+				fmt.Println("⚠️  Empty content. Entry not saved.")
+				return
+			}
 
 			entry := &domain.Entry{
 				Title:     title,
@@ -56,20 +61,36 @@ func newCreateCmd(repo *repository.FileRepository) *cobra.Command {
 	return cmd
 }
 
+//func readMultiLine() string {
+//	var lines []string
+//	scanner := bufio.NewScanner(os.Stdin)
+//	for scanner.Scan() {
+//		line := scanner.Text()
+//		if line == "" {
+//			// Check if next line is also empty
+//			if scanner.Scan() && scanner.Text() == "" {
+//				break
+//			}
+//		}
+//		lines = append(lines, line)
+//	}
+//	return strings.Join(lines, "\n")
+//}
+
 func readMultiLine() string {
-	var lines []string
+	var content strings.Builder
 	scanner := bufio.NewScanner(os.Stdin)
+
 	for scanner.Scan() {
-		line := scanner.Text()
-		if line == "" {
-			// Check if next line is also empty
-			if scanner.Scan() && scanner.Text() == "" {
-				break
-			}
-		}
-		lines = append(lines, line)
+		content.WriteString(scanner.Text())
+		content.WriteString("\n")
 	}
-	return strings.Join(lines, "\n")
+
+	if err := scanner.Err(); err != nil {
+		fmt.Printf("Warning: %v\n", err)
+	}
+
+	return strings.TrimSpace(content.String())
 }
 
 func parseTags(tagsStr string) []string {
