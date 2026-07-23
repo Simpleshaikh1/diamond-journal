@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -152,6 +153,34 @@ func (r *FileRepository) List(page, limit int, _ map[string]interface{}) ([]doma
 	//return entries, nil
 
 	return entries[offset:end], nil
+}
+
+func (r *FileRepository) Search(query string) ([]domain.Entry, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	query = strings.ToLower(strings.TrimSpace(query))
+	var results []domain.Entry
+
+	for _, entry := range r.entries {
+		contentLower := strings.ToLower(entry.Content)
+		titleLower := strings.ToLower(entry.Title)
+
+		if strings.Contains(titleLower, query) || strings.Contains(contentLower, query) {
+			results = append(results, *entry)
+		}
+	}
+
+	// Sort newest first
+	for i := 0; i < len(results)-1; i++ {
+		for j := i + 1; j < len(results); j++ {
+			if results[i].CreatedAt.Before(results[j].CreatedAt) {
+				results[i], results[j] = results[j], results[i]
+			}
+		}
+	}
+
+	return results, nil
 }
 
 func (r *FileRepository) save() error {
