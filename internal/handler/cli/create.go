@@ -9,10 +9,9 @@ import (
 	"time"
 
 	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
-	"github.com/Simpleshaikh1/diamond-journal/internal/repository"
 )
 
-func newCreateCmd(repo *repository.FileRepository) *cobra.Command {
+func newCreateCmd(repo domain.EntryRepository) *cobra.Command {
 	var moodStr, tagsStr string
 
 	cmd := &cobra.Command{

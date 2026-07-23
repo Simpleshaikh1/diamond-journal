@@ -6,10 +6,9 @@ import (
 	"strings"
 
 	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
-	"github.com/Simpleshaikh1/diamond-journal/internal/repository"
 )
 
-func newListCmd(repo *repository.FileRepository) *cobra.Command {
+func newListCmd(repo domain.EntryRepository) *cobra.Command {
 	var limit int
 	var moodStr, tag string
 
@@ -17,7 +16,7 @@ func newListCmd(repo *repository.FileRepository) *cobra.Command {
 		Use:   "list",
 		Short: "List Journal Entries",
 		Run: func(cmd *cobra.Command, args []string) {
-			entries, err := repo.List(1, limit, nil)
+			entries, err := repo.List(1, limit)
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				return

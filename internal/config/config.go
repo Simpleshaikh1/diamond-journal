@@ -9,11 +9,12 @@ import (
 )
 
 type Config struct {
-	AppName    string `mapstructure:"app_name"`
-	Version    string `mapstructure:"version"`
-	StorageDir string `mapstructure:"storage_dir"`
-	DBFile     string `mapstructure:"db_file"`
-	Editor     string `mapstructure:"editor"`
+	AppName     string `mapstructure:"app_name"`
+	Version     string `mapstructure:"version"`
+	StorageDir  string `mapstructure:"storage_dir"`
+	DBFile      string `mapstructure:"db_file"`
+	Editor      string `mapstructure:"editor"`
+	StorageType string `mapstructure:"storage_type"`
 }
 
 func Load() (*Config, error) {
@@ -27,6 +28,7 @@ func Load() (*Config, error) {
 	viper.SetDefault("storage_dir", "storage")
 	viper.SetDefault("db_file", "journal.db")
 	viper.SetDefault("editor", "code")
+	viper.SetDefault("storage_type", "sqlite")
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

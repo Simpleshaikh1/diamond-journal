@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	"github.com/Simpleshaikh1/diamond-journal/internal/repository"
+	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func newEditCmd(repo *repository.FileRepository) *cobra.Command {
+func newEditCmd(repo domain.EntryRepository) *cobra.Command {
 	var useEditor bool
 
 	cmd := &cobra.Command{

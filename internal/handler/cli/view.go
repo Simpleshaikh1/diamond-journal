@@ -2,14 +2,14 @@ package cli
 
 import (
 	"fmt"
-	"github.com/Simpleshaikh1/diamond-journal/internal/repository"
+	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
 	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
 )
 
-func newViewCmd(repo *repository.FileRepository) *cobra.Command {
+func newViewCmd(repo domain.EntryRepository) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "view [id]",
 		Short: "View a specific entry",

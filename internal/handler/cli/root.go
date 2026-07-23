@@ -1,22 +1,45 @@
 package cli
 
 import (
+	"fmt"
 	"github.com/Simpleshaikh1/diamond-journal/internal/config"
+	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
 	"github.com/Simpleshaikh1/diamond-journal/internal/repository"
 	"github.com/spf13/cobra"
+	"path/filepath"
+	"strings"
 )
 
 func Setup(root *cobra.Command, cfg *config.Config) {
-	fileRepo, err := repository.NewFileRepository(cfg.StorageDir)
+	var repo domain.EntryRepository
+	var err error
+
+	switch strings.ToLower(cfg.StorageType) {
+	case "file", "json":
+		repo, err = repository.NewFileRepository(cfg.StorageDir)
+		fmt.Println("📁 Using File (JSON) storage")
+
+	case "sqlite", "db", "":
+		// Default to SQLite
+		dbPath := filepath.Join(cfg.StorageDir, cfg.DBFile)
+		repo, err = repository.NewSQLiteRepository(dbPath)
+		fmt.Println("🗄️  Using SQLite database")
+
+	default:
+		fmt.Printf("Unknown storage_type: %s. Defaulting to SQLite.\n", cfg.StorageType)
+		dbPath := filepath.Join(cfg.StorageDir, cfg.DBFile)
+		repo, err = repository.NewSQLiteRepository(dbPath)
+	}
+
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("Failed to initialize repository: %v", err))
 	}
 
 	//Add commands
-	root.AddCommand(newCreateCmd(fileRepo))
-	root.AddCommand(newListCmd(fileRepo))
-	root.AddCommand(newViewCmd(fileRepo))
-	root.AddCommand(newEditCmd(fileRepo))
-	root.AddCommand(newDeleteCmd(fileRepo))
-	root.AddCommand(newSearchCmd(fileRepo))
+	root.AddCommand(newCreateCmd(repo))
+	root.AddCommand(newListCmd(repo))
+	root.AddCommand(newViewCmd(repo))
+	root.AddCommand(newEditCmd(repo))
+	root.AddCommand(newDeleteCmd(repo))
+	root.AddCommand(newSearchCmd(repo))
 }

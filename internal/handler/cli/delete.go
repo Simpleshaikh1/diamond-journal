@@ -2,13 +2,13 @@ package cli
 
 import (
 	"fmt"
-	"github.com/Simpleshaikh1/diamond-journal/internal/repository"
+	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
 	"github.com/spf13/cobra"
 	"strconv"
 	"strings"
 )
 
-func newDeleteCmd(repo *repository.FileRepository) *cobra.Command {
+func newDeleteCmd(repo domain.EntryRepository) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete [id]",
 		Short: "Delete an entry",

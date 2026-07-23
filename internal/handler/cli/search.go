@@ -2,14 +2,14 @@ package cli
 
 import (
 	"fmt"
-	"github.com/Simpleshaikh1/diamond-journal/internal/repository"
+	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
 	"strings"
 
 	//"github.com/Simpleshaikh1/diamond-journal/internal/domain"
 	"github.com/spf13/cobra"
 )
 
-func newSearchCmd(repo *repository.FileRepository) *cobra.Command {
+func newSearchCmd(repo domain.EntryRepository) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "search [query]",
 		Short: "Search entries by keyword",
