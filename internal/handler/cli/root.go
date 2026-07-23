@@ -7,9 +7,13 @@ import (
 )
 
 func Setup(root *cobra.Command, cfg *config.Config) {
-	fileRepo, _ := repository.NewFileRepository(cfg.StorageDir)
+	fileRepo, err := repository.NewFileRepository(cfg.StorageDir)
+	if err != nil {
+		panic(err)
+	}
 
 	//Add commands
 	root.AddCommand(newCreateCmd(fileRepo))
-	//root.AddCommand(newListCmd(fileRepo))
+	root.AddCommand(newListCmd(fileRepo))
+	root.AddCommand(newViewCmd(fileRepo))
 }

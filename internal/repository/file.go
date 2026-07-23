@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 	"time"
 
@@ -77,6 +78,68 @@ func (r *FileRepository) Update(entry *domain.Entry) error {
 	existing.UpdatedAt = time.Now()
 
 	return r.save()
+}
+
+func (r *FileRepository) GetByID(id uint) (*domain.Entry, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if entry, exists := r.entries[id]; exists {
+		return entry, nil
+	}
+	return nil, fmt.Errorf("entry not found")
+}
+
+func (r *FileRepository) List(page, limit int, _ map[string]interface{}) ([]domain.Entry, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if page < 1 {
+		page = 1
+	}
+
+	if limit <= 0 {
+		limit = 10
+	}
+
+	var entries []domain.Entry
+	for _, e := range r.entries {
+		entries = append(entries, *e)
+	}
+
+	// Simple sort by ID descending (newest first)
+	//for i := 0; i < len(entries)-1; i++ {
+	//	for j := i + 1; j < len(entries); j++ {
+	//		if entries[i].ID < entries[j].ID {
+	//			entries[i], entries[j] = entries[j], entries[i]
+	//		}
+	//	}
+	//}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].ID > entries[i].ID
+	})
+
+	// Calculate offset
+	offset := (page - 1) * limit
+
+	// Apply pagination
+	if offset >= len(entries) {
+		return []domain.Entry{}, nil
+	}
+
+	end := offset + limit
+	if end > len(entries) {
+		end = len(entries)
+	}
+
+	//if len(entries) > limit {
+	//	entries = entries[:limit]
+	//}
+
+	//return entries, nil
+
+	return entries[offset:end], nil
 }
 
 func (r *FileRepository) save() error {
