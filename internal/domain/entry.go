@@ -27,18 +27,18 @@ type Entry struct {
 }
 
 type EntryFilter struct {
-	Page      int
-	Limit     int
-	Mood      Mood
-	Tag       string
-	StartDate *time.Time
-	EndDate   *time.Time
-	Search    string
+	Page      int        `form:"page"`
+	Limit     int        `form:"limit"`
+	Mood      Mood       `form:"mood"`
+	Tag       string     `form:"tag"`
+	StartDate *time.Time `form:"start_date"`
+	EndDate   *time.Time `form:"end_date"`
+	Search    string     `form:"search"`
 }
 type EntryRepository interface {
 	Create(entry *Entry) error
 	GetByID(id uint) (*Entry, error)
-	List(page, limit int) ([]Entry, error)
+	List(filter EntryFilter) ([]Entry, int64, error)
 	Update(entry *Entry) error
 	Delete(id uint) error
 	Search(query string) ([]Entry, error)
