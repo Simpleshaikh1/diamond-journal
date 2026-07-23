@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/Simpleshaikh1/diamond-journal/internal/repository"
+	"github.com/Simpleshaikh1/diamond-journal/internal/server"
 	"os"
+	"path/filepath"
 
 	"github.com/Simpleshaikh1/diamond-journal/internal/config"
-	"github.com/Simpleshaikh1/diamond-journal/internal/handler/cli"
-
 	"github.com/spf13/cobra"
 )
 
@@ -23,10 +24,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	cli.Setup(rootCmd, cfg)
+	//cli.Setup(rootCmd, cfg)
 
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	// Setup repository (SQLite)
+	dbPath := filepath.Join(cfg.StorageDir, cfg.DBFile)
+	repo, err := repository.NewSQLiteRepository(dbPath)
+	if err != nil {
+		panic(err)
 	}
+
+	// Start API Server
+	api := server.SetupAPI(repo)
+	fmt.Println("🚀 Diamond Journal API running on http://localhost:8080")
+	api.Run(":8080")
+
+	//if err := rootCmd.Execute(); err != nil {
+	//	fmt.Println(err)
+	//	os.Exit(1)
+	//}
 }

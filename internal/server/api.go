@@ -9,14 +9,23 @@ import (
 func SetupAPI(repo domain.EntryRepository) *gin.Engine {
 	r := gin.Default()
 
-	handler := http.NewEntryHandler(repo)
+	// Middleware
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
+
+	h := http.NewEntryHandler(repo)
 
 	api := r.Group("/api/v1")
 	{
-		api.GET("/entries", handler.List)
-		api.POST("/entries", handler.Create)
-		api.GET("/entries/:id", handler.GetByID)
-		// We'll add more (update, delete, search) soon
+		entries := api.Group("/entries")
+		{
+			entries.GET("", h.List)
+			entries.POST("", h.Create)
+			entries.GET("/:id", h.GetByID)
+			entries.PUT("/:id", h.Update)
+			entries.DELETE("/:id", h.Delete)
+			entries.GET("/search", h.Search)
+		}
 	}
 
 	return r
