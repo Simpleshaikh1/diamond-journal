@@ -80,6 +80,18 @@ func (r *FileRepository) Update(entry *domain.Entry) error {
 	return r.save()
 }
 
+func (r *FileRepository) Delete(id uint) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, exists := r.entries[id]; !exists {
+		return fmt.Errorf("entry not found")
+	}
+
+	delete(r.entries, id)
+	return r.save()
+}
+
 func (r *FileRepository) GetByID(id uint) (*domain.Entry, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()

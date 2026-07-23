@@ -16,4 +16,6 @@ func Setup(root *cobra.Command, cfg *config.Config) {
 	root.AddCommand(newCreateCmd(fileRepo))
 	root.AddCommand(newListCmd(fileRepo))
 	root.AddCommand(newViewCmd(fileRepo))
+	root.AddCommand(newEditCmd(fileRepo))
+	root.AddCommand(newDeleteCmd(fileRepo))
 }
