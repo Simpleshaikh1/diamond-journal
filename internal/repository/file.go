@@ -103,7 +103,7 @@ func (r *FileRepository) GetByID(id uint) (*domain.Entry, error) {
 	return nil, fmt.Errorf("entry not found")
 }
 
-func (r *FileRepository) List(page, limit int, _ map[string]interface{}) ([]domain.Entry, error) {
+func (r *FileRepository) List(page, limit int) ([]domain.Entry, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
