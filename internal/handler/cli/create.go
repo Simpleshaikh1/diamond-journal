@@ -18,7 +18,7 @@ func newCreateCmd(repo *repository.FileRepository) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "new [title]",
 		Short: "Create a new journal entry",
-		//Args:  cobra.MinimumNArgs(0),
+		Args:  cobra.MinimumNArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
 			title := ""
 			if len(args) > 0 {
