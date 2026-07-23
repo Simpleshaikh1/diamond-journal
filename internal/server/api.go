@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
 	"github.com/Simpleshaikh1/diamond-journal/internal/handler/http"
+	"github.com/Simpleshaikh1/diamond-journal/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,6 +18,7 @@ func SetupAPI(repo domain.EntryRepository) *gin.Engine {
 
 	api := r.Group("/api/v1")
 	{
+		api.Use(middleware.AuthMiddleware("your-secret-api-key-here"))
 		entries := api.Group("/entries")
 		{
 			entries.GET("", h.List)

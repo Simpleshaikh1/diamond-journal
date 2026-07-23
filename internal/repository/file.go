@@ -103,19 +103,21 @@ func (r *FileRepository) GetByID(id uint) (*domain.Entry, error) {
 	return nil, fmt.Errorf("entry not found")
 }
 
-func (r *FileRepository) List(page, limit int) ([]domain.Entry, error) {
+func (r *FileRepository) List(filter domain.EntryFilter) ([]domain.Entry, int64, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	if page < 1 {
-		page = 1
+	if filter.Limit <= 0 {
+		filter.Limit = 20
+	}
+	if filter.Page < 1 {
+		filter.Page = 1
 	}
 
-	if limit <= 0 {
-		limit = 10
-	}
-
+	offset := (filter.Page - 1) * filter.Limit
 	var entries []domain.Entry
+	var total int64
+
 	for _, e := range r.entries {
 		entries = append(entries, *e)
 	}
@@ -134,14 +136,14 @@ func (r *FileRepository) List(page, limit int) ([]domain.Entry, error) {
 	})
 
 	// Calculate offset
-	offset := (page - 1) * limit
+	//offset := (page - 1) * limit
 
 	// Apply pagination
 	if offset >= len(entries) {
-		return []domain.Entry{}, nil
+		return []domain.Entry{}, total, nil
 	}
 
-	end := offset + limit
+	end := offset + filter.Limit
 	if end > len(entries) {
 		end = len(entries)
 	}
@@ -152,7 +154,7 @@ func (r *FileRepository) List(page, limit int) ([]domain.Entry, error) {
 
 	//return entries, nil
 
-	return entries[offset:end], nil
+	return entries[offset:end], total, nil
 }
 
 func (r *FileRepository) Search(query string) ([]domain.Entry, error) {

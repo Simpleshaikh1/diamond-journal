@@ -72,15 +72,40 @@ func (r *SQLiteRepository) GetByID(id uint) (*domain.Entry, error) {
 	return &entry, nil
 }
 
-func (r *SQLiteRepository) List(page, limit int) ([]domain.Entry, error) {
-	if limit <= 0 {
-		limit = 10
+func (r *SQLiteRepository) List(filter domain.EntryFilter) ([]domain.Entry, int64, error) {
+	if filter.Limit <= 0 {
+		filter.Limit = 20
+	}
+	if filter.Page < 1 {
+		filter.Page = 1
 	}
 
-	var entries []domain.Entry
-	err := r.db.Order("created_at desc").Limit(limit).Find(&entries).Error
+	offset := (filter.Page - 1) * filter.Limit
 
-	return entries, err
+	var entries []domain.Entry
+	var total int64
+
+	query := r.db.Model(&domain.Entry{}).Order("created_at desc")
+
+	// Apply filters
+	if filter.Mood != "" {
+		query = query.Where("mood = ?", filter.Mood)
+	}
+	if filter.Tag != "" {
+		query = query.Where("json_contains(tags, ?)", `["`+filter.Tag+`"]`)
+	}
+	if filter.Search != "" {
+		search := "%" + filter.Search + "%"
+		query = query.Where("title LIKE ? OR content LIKE ?", search, search)
+	}
+
+	// Count total
+	query.Count(&total)
+
+	// Get data
+	err := query.Offset(offset).Limit(filter.Limit).Find(&entries).Error
+
+	return entries, total, err
 }
 
 func (r *SQLiteRepository) Update(entry *domain.Entry) error {

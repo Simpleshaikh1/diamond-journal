@@ -18,16 +18,28 @@ func NewEntryHandler(repo domain.EntryRepository) *EntryHandler {
 
 // Get all entries
 func (h *EntryHandler) List(c *gin.Context) {
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-
-	entries, err := h.repo.List(page, limit)
-
+	var filter domain.EntryFilter
+	if err := c.ShouldBindQuery(&filter); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	entries, total, err := h.repo.List(filter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"status": "success", "data": entries})
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data": gin.H{
+			"entries": entries,
+			"pagination": gin.H{
+				"page":       filter.Page,
+				"limit":      filter.Limit,
+				"total":      total,
+				"totalPages": (total + int64(filter.Limit) - 1) / int64(filter.Limit),
+			},
+		},
+	})
 }
 
 // Create entry
