@@ -19,12 +19,15 @@ func NewEntryHandler(repo domain.EntryRepository) *EntryHandler {
 // Get all entries
 func (h *EntryHandler) List(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
-	entries, err := h.repo.List(1, limit)
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+
+	entries, err := h.repo.List(page, limit)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": entries})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": entries})
 }
 
 // Create entry
@@ -40,16 +43,86 @@ func (h *EntryHandler) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Entry created", "data": entry})
+	c.JSON(http.StatusCreated, gin.H{"status": "success", "message": "Entry created", "data": entry})
 }
 
 // Get one entry
 func (h *EntryHandler) GetByID(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
 	entry, err := h.repo.GetByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Entry not found"})
 		return
 	}
-	c.JSON(http.StatusOK, entry)
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": entry})
+}
+
+// Update Entry
+func (h *EntryHandler) Update(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	var entry domain.Entry
+	if err := c.ShouldBindJSON(&entry); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	entry.ID = uint(id)
+	if err := h.repo.Update(&entry); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Entry updated",
+		"data":    entry,
+	})
+}
+
+// DELETE Entry
+func (h *EntryHandler) Delete(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	if err := h.repo.Delete(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Entry deleted",
+	})
+}
+
+// Search
+func (h *EntryHandler) Search(c *gin.Context) {
+	query := c.Query("q")
+	if query == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Search query is required"})
+		return
+	}
+
+	entries, err := h.repo.Search(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data":   entries,
+	})
 }
