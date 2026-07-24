@@ -15,6 +15,7 @@ type Config struct {
 	DBFile      string `mapstructure:"db_file"`
 	Editor      string `mapstructure:"editor"`
 	StorageType string `mapstructure:"storage_type"`
+	//JWTSecret   string `mapstructure:"jwt_secret"`
 }
 
 func Load() (*Config, error) {
