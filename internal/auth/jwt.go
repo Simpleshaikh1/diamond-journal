@@ -11,15 +11,38 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-var jwtSecret = []byte("your-super-secret-key-change-in-production") // Move to config later
+type TokenPair struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+var jwtSecret []byte
+
+func Init(secret string) {
+	jwtSecret = []byte(secret)
+}
 
 // Generate JWT Token
-func GenerateToken(userID uint, username string) (string, error) {
+func GenerateAccessToken(userID uint, username string) (string, error) {
 	claims := Claims{
 		UserID:   userID,
 		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtSecret)
+}
+
+// Generate Refresh Token (long lived)
+func GenerateRefreshToken(userID uint) (string, error) {
+	claims := Claims{
+		UserID: userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)), // 7 days
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
