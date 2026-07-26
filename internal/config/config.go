@@ -15,7 +15,7 @@ type Config struct {
 	DBFile      string `mapstructure:"db_file"`
 	Editor      string `mapstructure:"editor"`
 	StorageType string `mapstructure:"storage_type"`
-	//JWTSecret   string `mapstructure:"jwt_secret"`
+	JWTSecret   string `mapstructure:"jwt_secret"`
 }
 
 func Load() (*Config, error) {
@@ -30,6 +30,7 @@ func Load() (*Config, error) {
 	viper.SetDefault("db_file", "journal.db")
 	viper.SetDefault("editor", "code")
 	viper.SetDefault("storage_type", "sqlite")
+	viper.SetDefault("jwt_secret", "your-super-secret-key-change-in-production-2026")
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

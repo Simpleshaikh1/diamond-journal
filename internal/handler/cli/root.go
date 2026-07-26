@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/Simpleshaikh1/diamond-journal/internal/auth"
 	"github.com/Simpleshaikh1/diamond-journal/internal/config"
 	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
 	"github.com/Simpleshaikh1/diamond-journal/internal/repository"
@@ -43,4 +44,7 @@ func Setup(root *cobra.Command, cfg *config.Config) {
 	root.AddCommand(newDeleteCmd(repo))
 	root.AddCommand(newSearchCmd(repo))
 	root.AddCommand(newAPICmd(repo))
+
+	auth.Init(cfg.JWTSecret)
+
 }
