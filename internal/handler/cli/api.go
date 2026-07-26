@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewAPICmd(repo domain.EntryRepository, sqliteRepo *repository.SQLiteRepository) *cobra.Command {
+func NewAPICmd(repo domain.EntryRepository) *cobra.Command {
 	var port string
 
 	cmd := &cobra.Command{
@@ -19,7 +19,13 @@ func NewAPICmd(repo domain.EntryRepository, sqliteRepo *repository.SQLiteReposit
 				port = "8080"
 			}
 
-			api := server.SetupAPI(repo, sqliteRepo) // We'll adjust this
+			sqliteRepo, ok := repo.(*repository.SQLiteRepository)
+			if !ok {
+				fmt.Println("Error: Repository is not SQLite")
+				return
+			}
+
+			api := server.SetupAPI(repo, sqliteRepo.GetDB()) // We'll adjust this
 
 			fmt.Printf("🚀 Diamond Journal API started on http://localhost:%s\n", port)
 			if err := api.Run(":" + port); err != nil {

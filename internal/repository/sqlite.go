@@ -47,7 +47,7 @@ func NewSQLiteRepository(dbPath string) (*SQLiteRepository, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	err = db.AutoMigrate(&domain.Entry{})
+	err = db.AutoMigrate(&domain.Entry{}, &domain.User{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to migrate: %w", err)
 	}
