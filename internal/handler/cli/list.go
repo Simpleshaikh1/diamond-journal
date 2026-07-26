@@ -10,13 +10,17 @@ import (
 
 func newListCmd(repo domain.EntryRepository) *cobra.Command {
 	var limit int
-	var moodStr, tag string
 
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List Journal Entries",
 		Run: func(cmd *cobra.Command, args []string) {
-			entries, err := repo.List(1, limit)
+			filter := domain.EntryFilter{
+				Page:  1,
+				Limit: limit,
+			}
+
+			entries, _, err := repo.List(filter)
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				return
@@ -41,7 +45,6 @@ func newListCmd(repo domain.EntryRepository) *cobra.Command {
 				fmt.Printf("%d. %s %s %s%s\n",
 					e.ID, moodEmoji, date, e.Title, tags)
 
-				// Preview of content
 				preview := e.Content
 				if len(preview) > 80 {
 					preview = preview[:77] + "..."
@@ -55,11 +58,8 @@ func newListCmd(repo domain.EntryRepository) *cobra.Command {
 	}
 
 	cmd.Flags().IntVarP(&limit, "limit", "l", 10, "Number of entries to show")
-	cmd.Flags().StringVar(&moodStr, "mood", "", "Filter by mood")
-	cmd.Flags().StringVar(&tag, "tag", "", "Filter by tag")
 	return cmd
 }
-
 func getMoodEmoji(m domain.Mood) string {
 	switch m {
 	case domain.MoodGreat:

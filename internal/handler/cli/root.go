@@ -43,7 +43,7 @@ func Setup(root *cobra.Command, cfg *config.Config) {
 	root.AddCommand(newEditCmd(repo))
 	root.AddCommand(newDeleteCmd(repo))
 	root.AddCommand(newSearchCmd(repo))
-	root.AddCommand(newAPICmd(repo))
+	root.AddCommand(NewAPICmd(repo))
 
 	auth.Init(cfg.JWTSecret)
 
