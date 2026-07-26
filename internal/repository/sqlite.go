@@ -17,6 +17,10 @@ type SQLiteRepository struct {
 	db *gorm.DB
 }
 
+func (r *SQLiteRepository) GetDB() *gorm.DB {
+	return r.db
+}
+
 func NewSQLiteRepository(dbPath string) (*SQLiteRepository, error) {
 
 	dir := filepath.Dir(dbPath)
@@ -29,14 +33,6 @@ func NewSQLiteRepository(dbPath string) (*SQLiteRepository, error) {
 	if !filepath.IsAbs(dbPath) {
 		dsn = filepath.Join(".", dbPath)
 	}
-
-	//sqliteDriver := sqlite.New(sqlite.Config{
-	//	DriverName: "sqlite",
-	//})
-
-	//db, err := gorm.Open(sqliteDriver.Open(dsn), &gorm.Config{
-	//	PrepareStmt: true,
-	//})
 
 	// Use modernc.org/sqlite driver (pure Go)
 	db, err := gorm.Open(sqliteDriver.Dialector{

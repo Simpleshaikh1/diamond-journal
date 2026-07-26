@@ -20,12 +20,12 @@ func NewEntryHandler(repo domain.EntryRepository) *EntryHandler {
 func (h *EntryHandler) List(c *gin.Context) {
 	var filter domain.EntryFilter
 
-	userID, exists := c.Get("user_id")
+	_, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
-	
+
 	if err := c.ShouldBindQuery(&filter); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

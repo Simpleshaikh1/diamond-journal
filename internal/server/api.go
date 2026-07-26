@@ -1,32 +1,44 @@
 package server
 
 import (
+	"fmt"
 	"github.com/Simpleshaikh1/diamond-journal/internal/domain"
 	"github.com/Simpleshaikh1/diamond-journal/internal/handler/http"
 	"github.com/Simpleshaikh1/diamond-journal/internal/middleware"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func SetupAPI(repo domain.EntryRepository) *gin.Engine {
+func SetupAPI(repo domain.EntryRepository, db *gorm.DB) *gin.Engine {
 	r := gin.Default()
 
-	// Middleware
-	r.Use(gin.Logger())
-	r.Use(gin.Recovery())
+	if db != nil {
+		fmt.Println("Warning: DB is nil in SetupApi")
+	}
 
-	h := http.NewEntryHandler(repo)
+	// Initialize Auth
+	authHandler := http.NewAuthHandler(db)
+	entryHandler := http.NewEntryHandler(repo)
 
-	api := r.Group("/api/v1")
+	// Public routes (Auth)
+	auth := r.Group("/api/v1/auth")
 	{
-		api.Use(middleware.AuthMiddleware("your-secret-api-key-here"))
-		entries := api.Group("/entries")
+		auth.POST("/register", authHandler.Register)
+		auth.POST("/login", authHandler.Login)
+	}
+
+	// Protected routes
+	protected := r.Group("/api/v1")
+	protected.Use(middleware.JWTAuth())
+	{
+		entries := protected.Group("/entries")
 		{
-			entries.GET("", h.List)
-			entries.POST("", h.Create)
-			entries.GET("/:id", h.GetByID)
-			entries.PUT("/:id", h.Update)
-			entries.DELETE("/:id", h.Delete)
-			entries.GET("/search", h.Search)
+			entries.GET("", entryHandler.List)
+			entries.POST("", entryHandler.Create)
+			entries.GET("/:id", entryHandler.GetByID)
+			entries.PUT("/:id", entryHandler.Update)
+			entries.DELETE("/:id", entryHandler.Delete)
+			entries.GET("/search", entryHandler.Search)
 		}
 	}
 
