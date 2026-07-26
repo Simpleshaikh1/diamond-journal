@@ -30,11 +30,20 @@ func (h *EntryHandler) List(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if filter.Limit <= 0 {
+		filter.Limit = 20
+	}
+	if filter.Page <= 0 {
+		filter.Page = 1
+	}
+
 	entries, total, err := h.repo.List(filter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	totalPages := (total + int64(filter.Limit) - 1) / int64(filter.Limit)
 	c.JSON(http.StatusOK, gin.H{
 		"status": "success",
 		"data": gin.H{
@@ -43,7 +52,7 @@ func (h *EntryHandler) List(c *gin.Context) {
 				"page":       filter.Page,
 				"limit":      filter.Limit,
 				"total":      total,
-				"totalPages": (total + int64(filter.Limit) - 1) / int64(filter.Limit),
+				"totalPages": totalPages,
 			},
 		},
 	})

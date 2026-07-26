@@ -39,7 +39,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		Email:    req.Email,
 		Password: string(hashedPassword),
 	}
-
+	
 	if err := h.db.Create(&user).Error; err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Username or email already exists"})
 		return
